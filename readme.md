@@ -5,4 +5,4 @@ The sourcecode is compatible to Arduino Mega 2560 and Ardino Due boards respecti
 The needed shield and cardridge connection will be added later on.
 
 Software:
-The software part can be uploaded with the Arduino IDE trough "hp45_upload_code.ino"
+The software part can be uploaded with the Arduino IDE through "hp45_upload_code.ino"
