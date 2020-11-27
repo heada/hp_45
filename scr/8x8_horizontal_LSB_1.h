@@ -3,6 +3,9 @@
 #include <avr/pgmspace.h>
 #include <Arduino.h>
 
+/*
+this file contains an 8 bit font Array 
+*/
 
 const byte font_horizontal [256][8] PROGMEM ={					// PROGMEM zur speicherung im Flash Speicher(32KB) anstatt im SRAM (2kb)
 {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},	// 0x00
