@@ -1,14 +1,8 @@
 //#include "8x8_horizontal_LSB_1.h"
-//#include "nozz_array.h"
-#include <Arduino.h>
-//#include <avr/pgmspace.h>
-//#include <stdio.h>
-#include <stdlib.h>
-//#include <constants.h>
-//#include <globals.h>
-//#include <measure.h>
-//#include <LED.h>
 
+#include <Arduino.h>
+#include <stdlib.h>
+#include "bit_arry.h"
 // uncomment to use SMT32_F103 Microcontroller
 //#define SMT32_F103
 #ifdef SMT32_F103
@@ -79,6 +73,7 @@ uint8_t wait_next;  // Zeit zwischen dem nuten verschiedener D�sen
 int t_s,bit,tmp_a, tmp_b, time;
 byte tmp_p, status;
 byte* pr_Array;
+NOZZLE_T noz;
 	//Buffer variables
 	
 struct Buffer {

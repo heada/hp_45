@@ -7,7 +7,7 @@
 #include "bit_arry.h"
 #include "globals.h"
 #include <stdint.h> 
-
+#include "PROGMEM_reader.h"
 //Der Konstruktor erh�lt drei Uebergabeparamater vom Typ uint. 
 // 1. Parameter definiert die Heizzeit f�r eine D�se. Limitiert durch MAX_HEAT_TIME
 // 2. Parameter definiert die Zeit zwischen der Aktivierung der selben Duese
@@ -70,6 +70,10 @@ HP_51645AE::~HP_51645AE(){
 delete[] pr_Array;
 
 }
+/*
+Activates ports to trigger TLC59213x Source Driver and CD4051BE Multiplexer
+	in : int prim
+*/
 void HP_51645AE::shot_all(int prim1_7, int prim8_14, int adr)		//Aktivieren einer D�se
 {  
 				#ifdef AVR_MEGA_2650
@@ -474,43 +478,7 @@ for(int i = 0; i<2;i++)
 		}
 	 }
 }
-
-
 							}
-// void HP_51645AE::store_bitmap(uint8_t width, int height) 
-// {
-
-// 	int data= 0;
-// 	//stepper_pos = motor_x->getPos(); // !!1INCREMENTGEBER!!!
-// 	delay(5);
-// 	//while(Serial.available()){Serial.read();}
-
-// 	Serial.print(1);
-// 	//int trash =	Serial.read(); 	//NUTZEN?
-// 	delay(100);
-// 	for(int row=0;row<=(width/301);row++)		// print next row
-// 		{
-// 		for(int col= 0;col<height;col++)		// col until row ends
-// 			{
-
-// 			while(Serial.available()<1){}
-
-// 		delay(5);  //kurze wartezeit um buffer zu f�llen
-// 			for(int i=0;i<38;i++)
-// 			{
-// 				data = Serial.read();
-// 					pr_Array[i] = data;
-// 			}
-
-
-// 		while(Serial.available())
-// 	    Serial.read();			//Buffer leeren
-// 		Serial.print(1);		//neue Daten anfordern
-// 		shotBitmap();			// empfangene Daten Druckn
-
-//  	}
-//  }		
-// }
 void HP_51645AE::heatdelay(uint16_t times)
 {
 	uint8_t i;
@@ -522,42 +490,6 @@ void HP_51645AE::heatdelay(uint16_t times)
 	}
 }
 
-/*uint8_t HP_51645AE::addPrintDataToBuffer(byte data)
-{
-	// 600 dpi
-	if(printResolutionFlag == 2)
-	{
-		if(numOfBytesInCol>=0)
-		{
-			if(numOfBytesInCol=38)
-			{
-			numOfBitsInRow++;
-			numOfBytesInCol=0;
-			}
-			NOZZLE_ARRAY_BUFFER[ numOfBytesInCol++][numOfBitsInRow] = data;
-			
-		}
-	}
-	// 300dpi
-	else 
-		{
-		if(numOfBytesInCol>0)
-		{
-			if(numOfBytesInCol=19)
-			{
-				if(numOfBitsInRow>=150)
-				{return FAIL;}
-			numOfBitsInRow++;
-			numOfBytesInCol=0;
-			}
-			NOZZLE_ARRAY_BUFFER[ numOfBytesInCol++][numOfBitsInRow] = data;
-			
-		}	
-			
-		}
-	
-	return SUCCESS;		
-}*/
  uint8_t HP_51645AE::processControlData(uint8_t data)
  {
 	 //
@@ -571,7 +503,6 @@ void HP_51645AE::heatdelay(uint16_t times)
  }
 void HP_51645AE::printCol(uint8_t* pData)
 {
-
 	uint8_t bit;
 	uint8_t data;
 	for (data = 0; data < 38; data++)
@@ -580,13 +511,7 @@ void HP_51645AE::printCol(uint8_t* pData)
 		{
 			if (1 & pData[data] >> bit)
 			{
-
-				
-
 				printNozzle((data*8)+bit);
-
-				// Serial.print(" : ");
-				// Serial.println(pData[data] >>  bit);
 			}
 		}
 
@@ -618,30 +543,40 @@ void HP_51645AE::printCol(uint8_t* pData)
 
 void HP_51645AE::printNozzle(uint16_t nozzle)
 
+
 {
-	Serial.print (nozzle);
-	if (nozzle%2 == 0)
-	{
-	shot(nozzle/22, nozzle%22);
+	// NOZZLE_T noz;
+	PROGMEM_readAnything (&nozzle_array [nozzle], noz);
+	// Serial.print (nozzle);
+	Serial.print ("prim: ");
+	Serial.print (noz.prim);
+	Serial.print ("adr: ");
+	Serial.println (noz.adr);
+	shot(noz.prim, noz.adr);
 	delayMicroseconds(wait_next);
+	// // Serial.print (nozzle);
+	// if (nozzle%2 == 0)
+	// {
+	
+	
 
-		Serial.print("{");
-	Serial.print (nozzle/22);
-		Serial.print(",");	
-	Serial.print(nozzle%22);
-		Serial.println("}");
+	// Serial.print("{");
+	// Serial.print (nozzle/22);
+	// 	Serial.print(",");	
+	// Serial.print(nozzle/2%22);
+	// 	Serial.println("},");
 
-	}
-	else
-	{
-	shot((nozzle+1)/22, (nozzle+3)%22);
-	delayMicroseconds(wait_next);
-		Serial.print("{");
-	Serial.print ((nozzle+1)/22);
-		Serial.print(",");	
-	Serial.print((nozzle+3)%22);
-		Serial.println("}");
-	}
+	// }
+	// else
+	// {
+	// // shot((nozzle+1)/22, (nozzle+3)%22);
+	// delayMicroseconds(wait_next);
+	// 	Serial.print("{");
+	// Serial.print ((nozzle/22)+1);
+	// 	Serial.print(",");	
+	// Serial.print((nozzle/2+4)%22);
+	// 	Serial.println("},");
+	// }
 	
 }
 void HP_51645AE::printColFast(uint8_t* pData)
@@ -671,9 +606,6 @@ void HP_51645AE::printColFast(uint8_t* pData)
 //     BUFFER_FAIL       der Ringbuffer ist voll. Es kann kein weiteres Byte gespeichert werden
 //     BUFFER_SUCCESS    das Byte wurde gespeichert
 uint8_t HP_51645AE::addPrintDataToBuffer(uint8_t* pData){
-//uint8_t	HP_51645AE::addPrintDataToBuffer(uint8_t* pData){
- //if (buffer.write >= BUFFER_SIZE)
-  //  buffer.write = 0; // erh�ht sicherheit
 
   if ( ( buffer.write + 1 == buffer.read ) ||
        ( buffer.read == 0 && buffer.write + 1 == BUFFER_SIZE ) )
